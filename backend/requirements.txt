@@ -4,8 +4,8 @@ uvicorn[standard]==0.29.0
 python-multipart==0.0.9       # needed for file uploads
 
 # ── Deep learning (disease detection) ───────────
-torch==2.3.0
-torchvision==0.18.0
+torch
+torchvision
 timm==0.9.16                  # pretrained Vision Transformer models
 grad-cam==1.5.0               # Grad-CAM heatmaps
 
