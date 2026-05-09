@@ -10,10 +10,10 @@ timm==0.9.16                  # pretrained Vision Transformer models
 grad-cam==1.5.0               # Grad-CAM heatmaps
 
 # ── Machine learning (yield prediction) ─────────
-scikit-learn==1.4.2
+scikit-learn==1.5.2
 xgboost==2.0.3
-numpy==1.26.4
-pandas==2.2.2
+numpy
+pandas
 
 # ── Explainability ───────────────────────────────
 shap==0.45.1
