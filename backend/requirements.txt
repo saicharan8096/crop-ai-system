@@ -7,7 +7,7 @@ python-multipart==0.0.9       # needed for file uploads
 torch
 torchvision
 timm==0.9.16                  # pretrained Vision Transformer models
-grad-cam==1.5.0               # Grad-CAM heatmaps
+             # Grad-CAM heatmaps
 
 # ── Machine learning (yield prediction) ─────────
 scikit-learn==1.5.2
