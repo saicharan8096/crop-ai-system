@@ -12,7 +12,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from typing import Literal
 
-from backend.utils.model_loader import load_yield_model
+from utils.model_loader import load_yield_model
 
 router = APIRouter()
 

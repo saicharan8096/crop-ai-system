@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import our route modules (each handles one feature)
-from backend.routes import disease, yield_pred, recommendations, weather
+from routes import disease, yield_pred, recommendations, weather
 
 # ── Create the FastAPI app ───────────────────────────────────────────────────
 app = FastAPI(
