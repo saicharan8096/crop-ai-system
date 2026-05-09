@@ -16,8 +16,6 @@ from pydantic import BaseModel
 from typing import Optional
 
 # pytorch_grad_cam gives us visual explanations (heatmaps)
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
 import numpy as np
 
 from utils.model_loader import load_disease_model
