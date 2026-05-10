@@ -4,5 +4,4 @@ __pycache__/
 node_modules/
 .env
 data/
-backend/models/
 .DS_Store
