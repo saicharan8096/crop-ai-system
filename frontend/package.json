@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI=false npm install --legacy-peer-deps && react-scripts build",
     "preview": "serve -s build -l $PORT"
   },
   "browserslist": {
