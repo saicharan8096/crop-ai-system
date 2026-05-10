@@ -19,7 +19,6 @@ from typing import Optional
 import numpy as np
 
 from utils.model_loader import load_disease_model
-
 router = APIRouter()
 
 # ── Disease class names (matches PlantVillage dataset order) ────────────────
@@ -44,7 +43,7 @@ DISEASE_CLASSES = [
 
 # ── Image preprocessing (must match training settings) ──────────────────────
 TRANSFORM = transforms.Compose([
-    transforms.Resize((128, 128)),        # resize to what the model expects
+    transforms.Resize((224, 224)),        # resize to what the model expects
     transforms.ToTensor(),                 # convert to tensor (0.0–1.0)
     transforms.Normalize(                  # normalize same as training
         mean=[0.485, 0.456, 0.406],
@@ -53,13 +52,13 @@ TRANSFORM = transforms.Compose([
 ])
 
 # ── Load model once when server starts (not on every request) ────────────────
-model = None
+print("Loading disease model...")
 
-def get_model():
-    global model
-    if model is None:
-        model = load_disease_model()
-    return model
+net = load_disease_model()
+
+net.eval()
+
+print("Disease model loaded.")
 
 
 # ── Response schema ──────────────────────────────────────────────────────────
@@ -103,8 +102,7 @@ async def predict_disease(file: UploadFile = File(...)):
     # Preprocess image for model
     img_tensor = TRANSFORM(image_pil).unsqueeze(0)  # add batch dimension
 
-    net = get_model()
-    net.eval()
+    
 
     # ── Run inference ────────────────────────────────────────────────────────
     with torch.no_grad():
