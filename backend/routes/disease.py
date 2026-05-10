@@ -126,22 +126,7 @@ async def predict_disease(file: UploadFile = File(...)):
 
     # ── Generate Grad-CAM heatmap ────────────────────────────────────────────
     heatmap_b64 = None
-    try:
-        target_layer = net.layer4[-1]  # last convolutional layer (for ResNet)
-        cam = GradCAM(model=net, target_layers=[target_layer])
-        grayscale_cam = cam(input_tensor=img_tensor)[0]
-
-        # Overlay heatmap on original image
-        img_np = np.array(image_pil.resize((224, 224))) / 255.0
-        visualization = show_cam_on_image(img_np, grayscale_cam, use_rgb=True)
-
-        # Encode to base64 so frontend can display it directly
-        pil_viz = Image.fromarray(visualization)
-        buffer = io.BytesIO()
-        pil_viz.save(buffer, format="JPEG")
-        heatmap_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-    except Exception:
-        pass  # heatmap is optional; don't fail the whole request
+     
 
     top3 = [
         {"class": DISEASE_CLASSES[i].replace("___", " — ").replace("_", " "),
