@@ -253,7 +253,32 @@ setHistory((prev) => {
             marginTop: 24,
           }}
         >
-          <h2 style={{ marginTop: 0 }}>Prediction History</h2>
+          <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}
+>
+  <h2 style={{ marginTop: 0 }}>Prediction History</h2>
+
+  <button
+    onClick={() => {
+      localStorage.removeItem("predictionHistory");
+      setHistory([]);
+    }}
+    style={{
+      background: "#ef4444",
+      color: "white",
+      border: "none",
+      padding: "6px 12px",
+      borderRadius: 6,
+      cursor: "pointer",
+    }}
+  >
+    Clear History
+  </button>
+</div>
 
           {history.map((item, index) => (
             <div
