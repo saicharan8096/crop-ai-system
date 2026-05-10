@@ -6,6 +6,7 @@
 
 import React, { useState } from "react";
 import { getRecommendations } from "../services/api";
+import { useTranslation } from "react-i18next";
 
 const inputStyle = {
   width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #d1d5db",
@@ -34,6 +35,7 @@ function ListCard({ title, emoji, items, color = "#2563eb" }) {
 }
 
 export default function Recommendations() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     crop: "Tomato", disease_name: "Early blight", severity: "Mild",
     temperature_c: 28, humidity_pct: 65, rainfall_last_7_days_mm: 20,
@@ -62,7 +64,7 @@ export default function Recommendations() {
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1 style={{ fontSize: "1.8rem", fontWeight: 600, marginBottom: 8 }}>💡 Recommendations</h1>
+      <h1 style={{ fontSize: "1.8rem", fontWeight: 600, marginBottom: 8 }}>💡 {t("recommendationsTitle")}</h1>
       <p style={{ color: "#6b7280", marginBottom: 32 }}>
         Enter your crop situation and weather conditions to get specific treatment,
         fertilizer, and irrigation recommendations.
@@ -71,11 +73,11 @@ export default function Recommendations() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 32 }}>
         {/* Form */}
         <div>
-          <h2 style={{ fontSize: "1.1rem", marginBottom: 16 }}>Crop Situation</h2>
+          <h2 style={{ fontSize: "1.1rem", marginBottom: 16 }}>{t("cropSituation")}</h2>
 
           {[
-            { label: "Crop", field: "crop", type: "text" },
-            { label: "Disease detected", field: "disease_name", type: "text" },
+            { label: t("crop"), field: "crop", type: "text" },
+            { label: t("diseaseDetected"), field: "disease_name", type: "text" },
           ].map(({ label, field }) => (
             <div key={field} style={{ marginBottom: 14 }}>
               <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{label}</label>
@@ -84,24 +86,24 @@ export default function Recommendations() {
           ))}
 
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>Severity</label>
+            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{t("severity")}</label>
             <select style={inputStyle} value={form.severity} onChange={update("severity")}>
               {["Healthy", "Mild", "Moderate", "Severe"].map((s) => <option key={s}>{s}</option>)}
             </select>
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>Crop Stage</label>
+            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{t("cropStage")}</label>
             <select style={inputStyle} value={form.crop_stage} onChange={update("crop_stage")}>
               {["Seedling", "Vegetative", "Flowering", "Fruiting", "Harvest"].map((s) => <option key={s}>{s}</option>)}
             </select>
           </div>
 
-          <h2 style={{ fontSize: "1rem", marginTop: 20, marginBottom: 12 }}>Current Weather</h2>
+          <h2 style={{ fontSize: "1rem", marginTop: 20, marginBottom: 12 }}>{t("currentWeather")}</h2>
           {[
-            { label: "Temperature (°C)", field: "temperature_c" },
-            { label: "Humidity (%)", field: "humidity_pct" },
-            { label: "Rainfall last 7 days (mm)", field: "rainfall_last_7_days_mm" },
+            { label: t("temperature"), field: "temperature_c" },
+            { label: t("humidity"), field: "humidity_pct" },
+            { label: t("rainfall"), field: "rainfall_last_7_days_mm" },
           ].map(({ label, field }) => (
             <div key={field} style={{ marginBottom: 14 }}>
               <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{label}</label>
@@ -120,7 +122,7 @@ export default function Recommendations() {
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? "Generating..." : "Get Recommendations →"}
+            {loading ? "Generating..." : `${t("getRecommendations")} →`}
           </button>
         </div>
 

@@ -15,6 +15,8 @@ import DiseaseDetection from "./pages/DiseaseDetection";
 import YieldPrediction  from "./pages/YieldPrediction";
 import Dashboard        from "./pages/Dashboard";
 import Recommendations  from "./pages/Recommendations";
+import "./i18n";
+import { useTranslation } from "react-i18next";
 
 // Navigation link style (active = highlighted)
 const navLinkStyle = ({ isActive }) => ({
@@ -32,6 +34,7 @@ const navLinkStyle = ({ isActive }) => ({
 });
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   return (
     <Router>
       <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
@@ -51,10 +54,31 @@ export default function App() {
           </div>
 
           {/* Nav links */}
-          <NavLink to="/"          style={navLinkStyle} end>🏠 Dashboard</NavLink>
-          <NavLink to="/disease"   style={navLinkStyle}>🌿 Disease Detection</NavLink>
-          <NavLink to="/yield"     style={navLinkStyle}>📊 Yield Prediction</NavLink>
-          <NavLink to="/recommend" style={navLinkStyle}>💡 Recommendations</NavLink>
+         <NavLink to="/" style={navLinkStyle} end>
+  🏠 {t("dashboard")}
+</NavLink>
+          <NavLink to="/disease"   style={navLinkStyle}>🌿 {t("diseaseDetection")}</NavLink>
+          <NavLink to="/yield"     style={navLinkStyle}>📊 {t("yieldPrediction")}</NavLink>
+          <NavLink to="/recommend" style={navLinkStyle}>💡 {t("recommendations")}</NavLink>
+          <div style={{ marginTop: 20 }}>
+  <button onClick={() => i18n.changeLanguage("en")}>
+    English
+  </button>
+
+  <button
+    onClick={() => i18n.changeLanguage("hi")}
+    style={{ marginLeft: 8 }}
+  >
+    हिंदी
+  </button>
+
+  <button
+    onClick={() => i18n.changeLanguage("te")}
+    style={{ marginLeft: 8 }}
+  >
+    తెలుగు
+  </button>
+</div>
 
           {/* Bottom info */}
           <div style={{ marginTop: "auto", padding: "1rem 0.5rem",

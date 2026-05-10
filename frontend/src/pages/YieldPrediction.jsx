@@ -16,6 +16,7 @@ import {
   Tooltip, ReferenceLine, ResponsiveContainer, Cell
 } from "recharts";
 import { predictYield } from "../services/api";
+import { useTranslation } from "react-i18next";
 
 const RISK_COLORS = {
   Low:    { bg: "#d1fae5", text: "#065f46" },
@@ -47,6 +48,7 @@ const inputStyle = {
 };
 
 export default function YieldPrediction() {
+  const { t } = useTranslation();
   const [form, setForm]     = useState(DEFAULT_FORM);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -78,19 +80,18 @@ export default function YieldPrediction() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
       <h1 style={{ fontSize: "1.8rem", fontWeight: 600, marginBottom: 8 }}>
-        📊 Yield Prediction
+      📊 {t("yieldTitle")}
       </h1>
       <p style={{ color: "#6b7280", marginBottom: 32 }}>
-        Enter your field's soil and weather data to get an AI-powered yield forecast
-        with a risk assessment and explainability chart.
+       {t("yieldDescription")}
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
         {/* ── Input form ──────────────────────────────────────────────── */}
         <div>
-          <h2 style={{ fontSize: "1.1rem", marginBottom: 16 }}>Field Details</h2>
+          <h2 style={{ fontSize: "1.1rem", marginBottom: 16 }}>{t("fieldDetails")}</h2>
 
-          <Field label="Crop">
+          <Field label={t("crop")}>
             <select style={inputStyle} value={form.crop} onChange={update("crop")}>
               {["Rice", "Wheat", "Maize", "Soybean", "Cotton"].map((c) => (
                 <option key={c}>{c}</option>
@@ -98,36 +99,36 @@ export default function YieldPrediction() {
             </select>
           </Field>
 
-          <Field label="Season">
+          <Field label={t("season")}>
             <select style={inputStyle} value={form.season} onChange={update("season")}>
-              <option>Kharif</option>
-              <option>Rabi</option>
-              <option>Zaid</option>
+              <option>{t("kharif")}</option>
+              <option>{t("rabi")}</option>
+              <option>{t("zaid")}</option>
             </select>
           </Field>
 
-          <Field label="Soil pH" help="Ideal range: 6.0 – 7.0">
+          <Field label={t("soilPh")} help={t("soilPhHelp")}>
             <input type="number" style={inputStyle} step="0.1" min="4" max="9"
                    value={form.soil_ph} onChange={update("soil_ph")} />
           </Field>
 
-          <Field label="Nitrogen (kg/ha)" help="Recommended: 60–120">
+          <Field label={t("nitrogen")} help={t("nitrogenHelp")}>
             <input type="number" style={inputStyle} value={form.nitrogen_kg_ha} onChange={update("nitrogen_kg_ha")} />
           </Field>
 
-          <Field label="Phosphorus (kg/ha)">
+          <Field label={t("phosphorus")} help={t("phosphorusHelp")}>
             <input type="number" style={inputStyle} value={form.phosphorus_kg_ha} onChange={update("phosphorus_kg_ha")} />
           </Field>
 
-          <Field label="Rainfall (mm/year)">
+          <Field label={t("rainfall")} help={t("rainfallHelp")}>
             <input type="number" style={inputStyle} value={form.rainfall_mm} onChange={update("rainfall_mm")} />
           </Field>
 
-          <Field label="Temperature (°C)">
+          <Field label={t("temperature")} help={t("temperatureHelp")}>
             <input type="number" style={inputStyle} value={form.temperature_c} onChange={update("temperature_c")} />
           </Field>
 
-          <Field label="Humidity (%)">
+          <Field label={t("humidity")} help={t("humidityHelp")}>
             <input type="number" style={inputStyle} value={form.humidity_pct} onChange={update("humidity_pct")} />
           </Field>
 
@@ -142,7 +143,7 @@ export default function YieldPrediction() {
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? "Predicting..." : "Predict Yield →"}
+            {loading ? t("predicting") : `${t("predictYield")} →`}
           </button>
         </div>
 
@@ -159,7 +160,7 @@ export default function YieldPrediction() {
             <>
               {/* Yield card */}
               <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem", marginBottom: 20 }}>
-                <h3 style={{ marginTop: 0, color: "#374151" }}>Predicted Yield</h3>
+                <h3 style={{ marginTop: 0, color: "#374151" }}>{t("predictedYield")}</h3>
 
                 <div style={{ fontSize: "2.5rem", fontWeight: 700, color: "#1d4ed8", marginBottom: 4 }}>
                   {result.predicted_yield_kg_ha.toLocaleString()} kg/ha
@@ -188,7 +189,7 @@ export default function YieldPrediction() {
                   background: RISK_COLORS[result.risk_score]?.bg,
                   color: RISK_COLORS[result.risk_score]?.text,
                 }}>
-                  {result.risk_score} Risk
+                  {result.risk_score} {t("risk")}
                 </span>
                 <p style={{ fontSize: 13, color: "#6b7280", marginTop: 8 }}>
                   {result.risk_explanation}
@@ -196,17 +197,16 @@ export default function YieldPrediction() {
 
                 <div style={{ background: "#eff6ff", borderRadius: 8, padding: "0.75rem",
                               borderLeft: "3px solid #2563eb", marginTop: 12 }}>
-                  <strong style={{ fontSize: 13 }}>Tip:</strong>
+                  <strong style={{ fontSize: 13 }}>{t("tip")}:</strong>
                   <span style={{ fontSize: 13, color: "#374151" }}> {result.recommendation_hint}</span>
                 </div>
               </div>
 
               {/* SHAP chart */}
               <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
-                <h3 style={{ marginTop: 0 }}>SHAP Feature Importance</h3>
+                <h3 style={{ marginTop: 0 }}>{t("shapImportance")}</h3>
                 <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-                  Green bars increased the prediction. Red bars decreased it.
-                  This tells you which factors matter most for your yield.
+                 {t("shapDescription")}
                 </p>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={shapData} layout="vertical" margin={{ left: 100, right: 20 }}>
@@ -229,7 +229,7 @@ export default function YieldPrediction() {
           {!result && !error && (
             <div style={{ background: "#f9fafb", border: "1px dashed #d1d5db",
                           borderRadius: 12, padding: "3rem", textAlign: "center", color: "#9ca3af" }}>
-              Fill in the form and click "Predict Yield" to see results here.
+            {t("fillForm")}
             </div>
           )}
         </div>

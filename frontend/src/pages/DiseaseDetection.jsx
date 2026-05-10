@@ -10,7 +10,8 @@
  * 4. Show results: disease name, severity badge, Grad-CAM heatmap, top 3 predictions
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react"
+import { useTranslation } from "react-i18next";
 import { detectDisease } from "../services/api";
 
 // Severity badge colors
@@ -22,6 +23,7 @@ const SEVERITY_COLORS = {
 };
 
 export default function DiseaseDetection() {
+  const { t, i18n } = useTranslation();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl]     = useState(null);
   const [result, setResult]             = useState(null);
@@ -87,10 +89,29 @@ setHistory((prev) => {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: window.innerWidth < 768 ? "1rem" : "2rem 1rem"}}>
       <h1 style={{ fontSize: window.innerWidth < 768 ? "1.1rem" : "1rem",minHeight: 55, fontWeight: 600, marginBottom: 8 }}>
-        🌿 Leaf Disease Detection
+       🌿 {t("title")}
       </h1>
+      <div style={{ marginBottom: 20 }}>
+  <button onClick={() => i18n.changeLanguage("en")}>
+    English
+  </button>
+
+  <button
+    onClick={() => i18n.changeLanguage("hi")}
+    style={{ marginLeft: 10 }}
+  >
+    हिंदी
+  </button>
+
+  <button
+    onClick={() => i18n.changeLanguage("te")}
+    style={{ marginLeft: 10 }}
+  >
+    తెలుగు
+  </button>
+</div>
       <p style={{ color: "#6b7280", marginBottom: 32 }}>
-        Upload a photo of a crop leaf. The AI will identify the disease, estimate severity,
+       {t("upload")}The AI will identify the disease, estimate severity,
         and show you exactly which part of the leaf triggered the diagnosis.
       </p>
 
@@ -153,7 +174,7 @@ setHistory((prev) => {
           marginBottom: 24,
         }}
       >
-        {loading ? "🔍 Analysing leaf..." : "Analyse Leaf →"}
+        {loading ? "🔍 Analysing leaf..." : `{t("analyse")} →`}
       </button>
 
       {/* ── Error ───────────────────────────────────────────────────────── */}
