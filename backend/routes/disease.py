@@ -41,19 +41,80 @@ DISEASE_CLASSES = [
     'Tomato_healthy'
 ]
 TREATMENTS = {
+
+    "Pepper__bell___Bacterial_spot": {
+        "pesticide": "Copper-based bactericide spray",
+        "advice": "Remove infected leaves and avoid overhead watering."
+    },
+
+    "Pepper__bell___healthy": {
+        "pesticide": "No pesticide needed",
+        "advice": "Plant is healthy. Continue regular monitoring."
+    },
+
+    "Potato___Early_blight": {
+        "pesticide": "Chlorothalonil fungicide",
+        "advice": "Remove affected leaves and improve air circulation."
+    },
+
     "Potato___Late_blight": {
         "pesticide": "Copper fungicide",
-        "advice": "Remove infected leaves and avoid excess moisture."
+        "advice": "Avoid excess moisture and destroy infected plants."
+    },
+
+    "Potato___healthy": {
+        "pesticide": "No pesticide needed",
+        "advice": "Crop appears healthy."
+    },
+
+    "Tomato_Bacterial_spot": {
+        "pesticide": "Copper bactericide spray",
+        "advice": "Use disease-free seeds and avoid wet foliage."
     },
 
     "Tomato_Early_blight": {
+        "pesticide": "Mancozeb fungicide",
+        "advice": "Prune lower leaves and rotate crops."
+    },
+
+    "Tomato_Late_blight": {
+        "pesticide": "Metalaxyl fungicide",
+        "advice": "Reduce humidity and remove infected parts quickly."
+    },
+
+    "Tomato_Leaf_Mold": {
         "pesticide": "Chlorothalonil spray",
-        "advice": "Improve airflow and avoid wet leaves."
+        "advice": "Improve greenhouse ventilation."
+    },
+
+    "Tomato_Septoria_leaf_spot": {
+        "pesticide": "Copper fungicide",
+        "advice": "Remove diseased leaves and avoid splashing water."
+    },
+
+    "Tomato_Spider_mites_Two_spotted_spider_mite": {
+        "pesticide": "Neem oil spray",
+        "advice": "Increase humidity and spray underside of leaves."
+    },
+
+    "Tomato__Target_Spot": {
+        "pesticide": "Azoxystrobin fungicide",
+        "advice": "Avoid overcrowding plants."
+    },
+
+    "Tomato__Tomato_YellowLeaf__Curl_Virus": {
+        "pesticide": "Control whiteflies with insecticide",
+        "advice": "Remove infected plants immediately."
+    },
+
+    "Tomato__Tomato_mosaic_virus": {
+        "pesticide": "No chemical cure available",
+        "advice": "Disinfect tools and remove infected plants."
     },
 
     "Tomato_healthy": {
-        "pesticide": "No treatment needed",
-        "advice": "Crop appears healthy."
+        "pesticide": "No pesticide needed",
+        "advice": "Plant is healthy."
     }
 }
 
