@@ -176,6 +176,9 @@ export default function DiseaseDetection() {
             <p><strong>Crop:</strong> {result.crop}</p>
             <p><strong>Disease:</strong> {result.disease_name}</p>
             <p><strong>Confidence:</strong> {(result.confidence * 100).toFixed(1)}%</p>
+            <p><strong>Pesticide:</strong> {result.pesticide}</p>
+
+<p><strong>Advice:</strong> {result.advice}</p>
 
             {/* Confidence bar */}
             <div style={{ background: "#e5e7eb", borderRadius: 4, height: 8, margin: "8px 0 20px" }}>

@@ -40,6 +40,22 @@ DISEASE_CLASSES = [
     'Tomato__Tomato_mosaic_virus',
     'Tomato_healthy'
 ]
+TREATMENTS = {
+    "Potato___Late_blight": {
+        "pesticide": "Copper fungicide",
+        "advice": "Remove infected leaves and avoid excess moisture."
+    },
+
+    "Tomato_Early_blight": {
+        "pesticide": "Chlorothalonil spray",
+        "advice": "Improve airflow and avoid wet leaves."
+    },
+
+    "Tomato_healthy": {
+        "pesticide": "No treatment needed",
+        "advice": "Crop appears healthy."
+    }
+}
 
 # ── Image preprocessing (must match training settings) ──────────────────────
 TRANSFORM = transforms.Compose([
@@ -69,7 +85,9 @@ class DiseaseResult(BaseModel):
     severity: str              # "Healthy" | "Mild" | "Moderate" | "Severe"
     is_healthy: bool
     heatmap_base64: Optional[str] = None   # Grad-CAM image as base64 string
-    top3_predictions: list     # top 3 possible diseases with scores
+    top3_predictions: list  
+    pesticide: Optional[str] = None
+advice: Optional[str] = None   # top 3 possible diseases with scores
 
 
 def confidence_to_severity(confidence: float, is_healthy: bool) -> str:
@@ -115,6 +133,17 @@ async def predict_disease(file: UploadFile = File(...)):
     predicted_idx  = top3_indices[0]
     predicted_class = DISEASE_CLASSES[predicted_idx]
     confidence     = float(top3_scores[0])
+    treatment = TREATMENTS.get(predicted_class, {})
+
+pesticide = treatment.get(
+    "pesticide",
+    "Consult local agriculture expert"
+)
+
+advice = treatment.get(
+    "advice",
+    "No advice available"
+)
 
     # Parse class name  e.g. "Tomato___Early_blight" → crop=Tomato, disease=Early blight
     parts = predicted_class.split("___")
@@ -140,4 +169,6 @@ async def predict_disease(file: UploadFile = File(...)):
         is_healthy=is_healthy,
         heatmap_base64=heatmap_b64,
         top3_predictions=top3,
+        pesticide=pesticide,
+advice=advice,
     )
