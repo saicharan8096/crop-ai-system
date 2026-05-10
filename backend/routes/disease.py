@@ -229,43 +229,43 @@ async def predict_disease(file: UploadFile = File(...)):
 
     heatmap_b64 = None
 
-try:
-    rgb_img = np.array(
-        image_pil.resize((224, 224))
-    ) / 255.0
+    try:
+        rgb_img = np.array(
+            image_pil.resize((224, 224))
+        ) / 255.0
 
-    cam = GradCAM(
-        model=net,
-        target_layers=target_layers
-    )
+        cam = GradCAM(
+            model=net,
+            target_layers=target_layers
+        )
 
-    grayscale_cam = cam(
-        input_tensor=img_tensor
-    )[0]
+        grayscale_cam = cam(
+            input_tensor=img_tensor
+        )[0]
 
-    visualization = show_cam_on_image(
-        rgb_img,
-        grayscale_cam,
-        use_rgb=True
-    )
+        visualization = show_cam_on_image(
+            rgb_img,
+            grayscale_cam,
+            use_rgb=True
+        )
 
-    heatmap_pil = Image.fromarray(
-        visualization
-    )
+        heatmap_pil = Image.fromarray(
+            visualization
+        )
 
-    buffered = io.BytesIO()
+        buffered = io.BytesIO()
 
-    heatmap_pil.save(
-        buffered,
-        format="PNG"
-    )
+        heatmap_pil.save(
+            buffered,
+            format="PNG"
+        )
 
-    heatmap_b64 = base64.b64encode(
-        buffered.getvalue()
-    ).decode()
+        heatmap_b64 = base64.b64encode(
+            buffered.getvalue()
+        ).decode()
 
-except Exception as e:
-    print("GradCAM error:", e)
+    except Exception as e:
+        print("GradCAM error:", e)
 
     top3 = [
         {
@@ -274,6 +274,7 @@ except Exception as e:
         }
         for i, s in zip(top3_indices, top3_scores)
     ]
+
     return DiseaseResult(
         disease_name=disease,
         crop=crop,
@@ -283,5 +284,7 @@ except Exception as e:
         heatmap_base64=heatmap_b64,
         top3_predictions=top3,
         pesticide=pesticide,
-advice=advice,
+        advice=advice,
     )
+
+    
