@@ -14,7 +14,7 @@ const BASE_URL = "https://crop-ai-system-production.up.railway.app/api";
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,   // 30 second timeout (model inference can take a few seconds)
+  timeout: 120000,   // 120 second timeout (model inference can take a few seconds)
 });
 
 
