@@ -25,7 +25,10 @@ export default function DiseaseDetection() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl]     = useState(null);
   const [result, setResult]             = useState(null);
-  const [history, setHistory]           = useState([]);
+  const [history, setHistory] = useState(() => {
+  const saved = localStorage.getItem("predictionHistory");
+  return saved ? JSON.parse(saved) : [];
+});
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
 
@@ -62,7 +65,16 @@ export default function DiseaseDetection() {
   confidence: data.confidence,
 };
 
-setHistory((prev) => [newEntry, ...prev]);
+setHistory((prev) => {
+  const updated = [newEntry, ...prev];
+
+  localStorage.setItem(
+    "predictionHistory",
+    JSON.stringify(updated)
+  );
+
+  return updated;
+});
     } catch (err) {
       setError(err.response?.data?.detail || "Error connecting to server. Is the backend running?");
     } finally {
