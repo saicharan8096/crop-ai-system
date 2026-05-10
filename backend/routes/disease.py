@@ -41,83 +41,82 @@ DISEASE_CLASSES = [
     'Tomato__Tomato_mosaic_virus',
     'Tomato_healthy'
 ]
+
 TREATMENTS = {
 
-    "Pepper__bell___Bacterial_spot": {
-        "pesticide": "Copper-based bactericide spray",
-        "advice": "Remove infected leaves and avoid overhead watering."
+    "Tomato___Early_blight": {
+        "pesticide": "Mancozeb 75% WP",
+        "advice": "Remove infected leaves and avoid overhead watering.",
+        "dosage": "2.5 g per liter of water"
     },
 
-    "Pepper__bell___healthy": {
-        "pesticide": "No pesticide needed",
-        "advice": "Plant is healthy. Continue regular monitoring."
+    "Tomato___Late_blight": {
+        "pesticide": "Copper oxychloride",
+        "advice": "Avoid excess moisture and destroy infected plants.",
+        "dosage": "3 g per liter of water"
+    },
+
+    "Tomato___Bacterial_spot": {
+        "pesticide": "Copper bactericide spray",
+        "advice": "Use disease-free seeds and avoid wet foliage.",
+        "dosage": "2 g per liter of water"
+    },
+
+    "Tomato___Leaf_Mold": {
+        "pesticide": "Chlorothalonil",
+        "advice": "Improve air circulation and reduce humidity.",
+        "dosage": "2.5 ml per liter"
+    },
+
+    "Tomato___Septoria_leaf_spot": {
+        "pesticide": "Mancozeb",
+        "advice": "Remove infected leaves and rotate crops.",
+        "dosage": "2 g per liter"
+    },
+
+    "Tomato___Tomato_mosaic_virus": {
+        "pesticide": "No chemical cure",
+        "advice": "Remove infected plants and disinfect tools.",
+        "dosage": "Not applicable"
+    },
+
+    "Tomato___healthy": {
+        "pesticide": "None required",
+        "advice": "Plant is healthy. Maintain proper irrigation.",
+        "dosage": "-"
     },
 
     "Potato___Early_blight": {
-        "pesticide": "Chlorothalonil fungicide",
-        "advice": "Remove affected leaves and improve air circulation."
+        "pesticide": "Mancozeb",
+        "advice": "Avoid leaf wetness and apply fungicide regularly.",
+        "dosage": "2.5 g per liter"
     },
 
     "Potato___Late_blight": {
         "pesticide": "Copper fungicide",
-        "advice": "Avoid excess moisture and destroy infected plants."
+        "advice": "Destroy infected plants and avoid overwatering.",
+        "dosage": "3 g per liter"
     },
 
     "Potato___healthy": {
-        "pesticide": "No pesticide needed",
-        "advice": "Crop appears healthy."
+        "pesticide": "None required",
+        "advice": "Crop is healthy.",
+        "dosage": "-"
     },
 
-    "Tomato_Bacterial_spot": {
-        "pesticide": "Copper bactericide spray",
-        "advice": "Use disease-free seeds and avoid wet foliage."
+    "Pepper__bell___Bacterial_spot": {
+        "pesticide": "Copper-based bactericide",
+        "advice": "Remove infected leaves and avoid overhead watering.",
+        "dosage": "2 g per liter"
     },
 
-    "Tomato_Early_blight": {
-        "pesticide": "Mancozeb fungicide",
-        "advice": "Prune lower leaves and rotate crops."
-    },
-
-    "Tomato_Late_blight": {
-        "pesticide": "Metalaxyl fungicide",
-        "advice": "Reduce humidity and remove infected parts quickly."
-    },
-
-    "Tomato_Leaf_Mold": {
-        "pesticide": "Chlorothalonil spray",
-        "advice": "Improve greenhouse ventilation."
-    },
-
-    "Tomato_Septoria_leaf_spot": {
-        "pesticide": "Copper fungicide",
-        "advice": "Remove diseased leaves and avoid splashing water."
-    },
-
-    "Tomato_Spider_mites_Two_spotted_spider_mite": {
-        "pesticide": "Neem oil spray",
-        "advice": "Increase humidity and spray underside of leaves."
-    },
-
-    "Tomato__Target_Spot": {
-        "pesticide": "Azoxystrobin fungicide",
-        "advice": "Avoid overcrowding plants."
-    },
-
-    "Tomato__Tomato_YellowLeaf__Curl_Virus": {
-        "pesticide": "Control whiteflies with insecticide",
-        "advice": "Remove infected plants immediately."
-    },
-
-    "Tomato__Tomato_mosaic_virus": {
-        "pesticide": "No chemical cure available",
-        "advice": "Disinfect tools and remove infected plants."
-    },
-
-    "Tomato_healthy": {
-        "pesticide": "No pesticide needed",
-        "advice": "Plant is healthy."
+    "Pepper__bell___healthy": {
+        "pesticide": "None required",
+        "advice": "Plant is healthy.",
+        "dosage": "-"
     }
 }
+
 
 # ── Image preprocessing (must match training settings) ──────────────────────
 TRANSFORM = transforms.Compose([
@@ -151,7 +150,9 @@ class DiseaseResult(BaseModel):
     heatmap_base64: Optional[str] = None   # Grad-CAM image as base64 string
     top3_predictions: list  
     pesticide: Optional[str] = None
-    advice: Optional[str] = None   # top 3 possible diseases with scores
+    advice: Optional[str] = None  
+    dosage: Optional[str] = None
+     # top 3 possible diseases with scores
 
 
 def confidence_to_severity(confidence: float, is_healthy: bool) -> str:
@@ -216,6 +217,10 @@ async def predict_disease(file: UploadFile = File(...)):
         "advice",
         "No advice available"
     )
+    
+    dosage = treatment.get(
+        "dosage",
+          "Consult expert")
 
     # Parse class name
     parts = predicted_class.split("___")
@@ -246,6 +251,7 @@ async def predict_disease(file: UploadFile = File(...)):
         top3_predictions=top3,
         pesticide=pesticide,
         advice=advice,
+        dosage=dosage,
     )
 
     
