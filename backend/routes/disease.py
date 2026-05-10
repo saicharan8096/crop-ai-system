@@ -196,6 +196,9 @@ async def predict_disease(file: UploadFile = File(...)):
     predicted_idx = top3_indices[0]
 
     predicted_class = DISEASE_CLASSES[predicted_idx]
+    print("TOP3:", top3_indices)
+    print("PROBS:", top3_scores)
+    print("CLASS:", predicted_class)
 
     confidence = float(top3_scores[0])
 
