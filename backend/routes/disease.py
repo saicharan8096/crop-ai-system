@@ -87,7 +87,7 @@ class DiseaseResult(BaseModel):
     heatmap_base64: Optional[str] = None   # Grad-CAM image as base64 string
     top3_predictions: list  
     pesticide: Optional[str] = None
-advice: Optional[str] = None   # top 3 possible diseases with scores
+    advice: Optional[str] = None   # top 3 possible diseases with scores
 
 
 def confidence_to_severity(confidence: float, is_healthy: bool) -> str:
@@ -130,27 +130,32 @@ async def predict_disease(file: UploadFile = File(...)):
     top3_indices = torch.topk(probabilities, 3).indices.tolist()
     top3_scores  = torch.topk(probabilities, 3).values.tolist()
 
-    predicted_idx  = top3_indices[0]
+       predicted_idx = top3_indices[0]
+
     predicted_class = DISEASE_CLASSES[predicted_idx]
-    confidence     = float(top3_scores[0])
+
+    confidence = float(top3_scores[0])
+
     treatment = TREATMENTS.get(predicted_class, {})
 
-pesticide = treatment.get(
-    "pesticide",
-    "Consult local agriculture expert"
-)
+    pesticide = treatment.get(
+        "pesticide",
+        "Consult local agriculture expert"
+    )
 
-advice = treatment.get(
-    "advice",
-    "No advice available"
-)
+    advice = treatment.get(
+        "advice",
+        "No advice available"
+    )
 
-    # Parse class name  e.g. "Tomato___Early_blight" → crop=Tomato, disease=Early blight
+    # Parse class name
     parts = predicted_class.split("___")
-    crop    = parts[0].replace("_", " ")
-    disease = parts[1].replace("_", " ") if len(parts) > 1 else predicted_class
-    is_healthy = "healthy" in predicted_class.lower()
 
+    crop = parts[0].replace("_", " ")
+
+    disease = parts[1].replace("_", " ") if len(parts) > 1 else predicted_class
+
+    is_healthy = "healthy" in predicted_class.lower()
     # ── Generate Grad-CAM heatmap ────────────────────────────────────────────
     heatmap_b64 = None
      
