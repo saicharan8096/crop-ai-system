@@ -1,0 +1,17 @@
+venv
+.venv
+__pycache__
+*.pyc
+.ipynb_checkpoints
+.git
+.gitignore
+dataset
+datasets
+data
+images
+uploads
+notebooks
+node_modules
+frontend
+.env
+.cache
