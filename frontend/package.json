@@ -3,21 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "axios": "^1.7.2",
-    "i18next": "^26.0.10",
+    "ajv": "8.12.0",
+    "ajv-keywords": "5.1.0",
+    "axios": "1.7.2",
+    "i18next": "^22.5.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-dropzone": "^14.2.3",
-    "react-i18next": "^17.0.7",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
-    "recharts": "^2.12.7",
-    "serve": "^14.2.6",
-    "yaml": "^2.8.4"
+    "react-dropzone": "14.2.3",
+    "react-i18next": "^12.2.2",
+    "react-router-dom": "6.23.1",
+    "react-scripts": "^5.0.1",
+    "recharts": "2.12.7",
+    "serve": "14.2.6",
+    "typescript": "4.9.5",
+    "yaml": "2.8.4"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false npm install --legacy-peer-deps && react-scripts build",
+    "build": "react-scripts build",
     "preview": "serve -s build -l $PORT"
   },
   "browserslist": {
