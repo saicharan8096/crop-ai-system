@@ -64,8 +64,8 @@ export default function DiseaseDetection() {
   const severityStyle = result ? SEVERITY_COLORS[result.severity] || SEVERITY_COLORS.Mild : {};
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1 style={{ fontSize: "1.8rem", fontWeight: 600, marginBottom: 8 }}>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: window.innerWidth < 768 ? "1rem" : "2rem 1rem"}}>
+      <h1 style={{ fontSize: window.innerWidth < 768 ? "1.1rem" : "1rem",minHeight: 55, fontWeight: 600, marginBottom: 8 }}>
         🌿 Leaf Disease Detection
       </h1>
       <p style={{ color: "#6b7280", marginBottom: 32 }}>
@@ -145,7 +145,14 @@ export default function DiseaseDetection() {
 
       {/* ── Results ─────────────────────────────────────────────────────── */}
       {result && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div
+  style={{
+    display: "grid",
+    gridTemplateColumns:
+      window.innerWidth < 768 ? "1fr" : "1fr 1fr",
+    gap: 20,
+  }}
+>
 
           {/* Left: diagnosis details */}
           <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
