@@ -25,6 +25,7 @@ export default function DiseaseDetection() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl]     = useState(null);
   const [result, setResult]             = useState(null);
+  const [history, setHistory]           = useState([]);
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
 
@@ -54,6 +55,14 @@ export default function DiseaseDetection() {
     try {
       const data = await detectDisease(selectedFile);
       setResult(data);
+      const newEntry = {
+  time: new Date().toLocaleString(),
+  crop: data.crop,
+  disease: data.disease_name,
+  confidence: data.confidence,
+};
+
+setHistory((prev) => [newEntry, ...prev]);
     } catch (err) {
       setError(err.response?.data?.detail || "Error connecting to server. Is the backend running?");
     } finally {
@@ -223,6 +232,37 @@ export default function DiseaseDetection() {
           </div>
         </div>
       )}
+       {history.length > 0 && (
+        <div
+          style={{
+            border: "1px solid #e5e7eb",
+            borderRadius: 12,
+            padding: "1.5rem",
+            marginTop: 24,
+          }}
+        >
+          <h2 style={{ marginTop: 0 }}>Prediction History</h2>
+
+          {history.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                padding: "10px 0",
+                borderBottom: "1px solid #f3f4f6",
+              }}
+            >
+              <p><strong>Time:</strong> {item.time}</p>
+              <p><strong>Crop:</strong> {item.crop}</p>
+              <p><strong>Disease:</strong> {item.disease}</p>
+              <p>
+                <strong>Confidence:</strong>{" "}
+                {(item.confidence * 100).toFixed(1)}%
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
+         
   );
 }
