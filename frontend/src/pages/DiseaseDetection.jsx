@@ -178,6 +178,52 @@ setHistory((prev) => {
           {/* Left: diagnosis details */}
           <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
             <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Diagnosis</h2>
+            <button
+  onClick={() => {
+    const report = `
+Crop: ${result.crop}
+
+Disease: ${result.disease_name}
+
+Confidence: ${(result.confidence * 100).toFixed(1)}%
+
+Pesticide: ${result.pesticide}
+
+Dosage: ${result.dosage}
+
+Advice: ${result.advice}
+
+Generated: ${new Date().toLocaleString()}
+`;
+
+    const blob = new Blob([report], {
+      type: "text/plain",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download = "crop-disease-report.txt";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }}
+  style={{
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    padding: "8px 14px",
+    borderRadius: 6,
+    cursor: "pointer",
+    marginBottom: 16,
+  }}
+>
+  Download Report
+</button>
 
             {/* Severity badge */}
             <span style={{
