@@ -186,6 +186,7 @@ async def predict_disease(file: UploadFile = File(...)):
     # ── Run inference ────────────────────────────────────────────────────────
     with torch.no_grad():
         outputs = net(img_tensor)
+        print(outputs)
         probabilities = torch.softmax(outputs, dim=1)[0]
 
         top3_indices = torch.topk(probabilities, 3).indices.tolist()
