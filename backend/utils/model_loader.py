@@ -38,6 +38,8 @@ def load_disease_model():
         model.load_state_dict(state_dict)
 
         print(f"✅ Disease model loaded from {DISEASE_MODEL_PATH}")
+        print("MODEL WEIGHTS LOADED SUCCESSFULLY")
+        print(state_dict.keys())
 
     else:
 
