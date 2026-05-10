@@ -127,10 +127,11 @@ async def predict_disease(file: UploadFile = File(...)):
         outputs = net(img_tensor)
         probabilities = torch.softmax(outputs, dim=1)[0]
 
-    top3_indices = torch.topk(probabilities, 3).indices.tolist()
-    top3_scores  = torch.topk(probabilities, 3).values.tolist()
+        top3_indices = torch.topk(probabilities, 3).indices.tolist()
 
-       predicted_idx = top3_indices[0]
+    top3_scores = torch.topk(probabilities, 3).values.tolist()
+
+    predicted_idx = top3_indices[0]
 
     predicted_class = DISEASE_CLASSES[predicted_idx]
 
@@ -156,16 +157,16 @@ async def predict_disease(file: UploadFile = File(...)):
     disease = parts[1].replace("_", " ") if len(parts) > 1 else predicted_class
 
     is_healthy = "healthy" in predicted_class.lower()
-    # ── Generate Grad-CAM heatmap ────────────────────────────────────────────
+
     heatmap_b64 = None
-     
 
     top3 = [
-        {"class": DISEASE_CLASSES[i].replace("___", " — ").replace("_", " "),
-         "confidence": round(float(s), 4)}
+        {
+            "class": DISEASE_CLASSES[i].replace("___", " — ").replace("_", " "),
+            "confidence": round(float(s), 4)
+        }
         for i, s in zip(top3_indices, top3_scores)
     ]
-
     return DiseaseResult(
         disease_name=disease,
         crop=crop,
