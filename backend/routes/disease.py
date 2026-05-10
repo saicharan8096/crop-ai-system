@@ -14,6 +14,8 @@ from PIL import Image
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
 
 # pytorch_grad_cam gives us visual explanations (heatmaps)
 import numpy as np
@@ -135,6 +137,8 @@ net = load_disease_model()
 
 net.eval()
 
+target_layers = [net.layer4[-1]]
+
 print("Disease model loaded.")
 
 
@@ -224,6 +228,44 @@ async def predict_disease(file: UploadFile = File(...)):
     is_healthy = "healthy" in predicted_class.lower()
 
     heatmap_b64 = None
+
+try:
+    rgb_img = np.array(
+        image_pil.resize((224, 224))
+    ) / 255.0
+
+    cam = GradCAM(
+        model=net,
+        target_layers=target_layers
+    )
+
+    grayscale_cam = cam(
+        input_tensor=img_tensor
+    )[0]
+
+    visualization = show_cam_on_image(
+        rgb_img,
+        grayscale_cam,
+        use_rgb=True
+    )
+
+    heatmap_pil = Image.fromarray(
+        visualization
+    )
+
+    buffered = io.BytesIO()
+
+    heatmap_pil.save(
+        buffered,
+        format="PNG"
+    )
+
+    heatmap_b64 = base64.b64encode(
+        buffered.getvalue()
+    ).decode()
+
+except Exception as e:
+    print("GradCAM error:", e)
 
     top3 = [
         {
