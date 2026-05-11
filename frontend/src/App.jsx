@@ -10,7 +10,13 @@
  */
 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
 import DiseaseDetection from "./pages/DiseaseDetection";
 import YieldPrediction  from "./pages/YieldPrediction";
 import Dashboard        from "./pages/Dashboard";
@@ -33,10 +39,101 @@ const navLinkStyle = ({ isActive }) => ({
   transition: "all 0.15s",
 });
 
-export default function App() {
+function AppContent()  {
+  
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const speak = (text) => {
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  speech.lang =
+    i18n.language === "te"
+      ? "te-IN"
+      : i18n.language === "hi"
+      ? "hi-IN"
+      : "en-US";
+
+  window.speechSynthesis.speak(speech);
+};
+  const startVoiceAssistant = () => {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition not supported");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+
+  recognition.lang =
+    i18n.language === "te"
+      ? "te-IN"
+      : i18n.language === "hi"
+      ? "hi-IN"
+      : "en-US";
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+
+    const command =
+      event.results[0][0].transcript.toLowerCase();
+
+    console.log(command);
+
+    // Dashboard
+    if (
+      command.includes("dashboard") ||
+      command.includes("डैशबोर्ड") ||
+      command.includes("డాష్‌బోర్డ్")
+    ) {
+      navigate("/");
+      speak("Opening dashboard");
+    }
+
+    // Disease Detection
+    else if (
+      command.includes("disease") ||
+      command.includes("रोग") ||
+      command.includes("వ్యాధి")
+    ) {
+      navigate("/disease");
+      speak("Opening disease detection");
+    }
+
+    // Yield Prediction
+    else if (
+      command.includes("yield") ||
+      command.includes("उपज") ||
+      command.includes("దిగుబడి")
+    ) {
+      navigate("/yield");
+      speak("Opening yield prediction");
+    }
+
+    // Recommendations
+    else if (
+      command.includes("recommend") ||
+      command.includes("सिफारिश") ||
+      command.includes("సిఫార్సు")
+    ) {
+      navigate("/recommend");
+      speak("Opening recommendations");
+    }
+
+    else {
+      speak("Command not recognized");
+    }
+  };
+};
   return (
-    <Router>
+    
       <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif" }}>
 
         {/* ── Sidebar navigation ──────────────────────────────────────── */}
@@ -60,6 +157,21 @@ export default function App() {
           <NavLink to="/disease"   style={navLinkStyle}>🌿 {t("diseaseDetection")}</NavLink>
           <NavLink to="/yield"     style={navLinkStyle}>📊 {t("yieldPrediction")}</NavLink>
           <NavLink to="/recommend" style={navLinkStyle}>💡 {t("recommendations")}</NavLink>
+          <button
+  onClick={startVoiceAssistant}
+  style={{
+    marginTop: 16,
+    padding: "12px",
+    border: "none",
+    borderRadius: 10,
+    background: "#2563eb",
+    color: "white",
+    fontWeight: 600,
+    cursor: "pointer",
+  }}
+>
+  🎤 AI Voice Assistant
+</button>
           <div style={{ marginTop: 20 }}>
   <button onClick={() => i18n.changeLanguage("en")}>
     English
@@ -98,6 +210,13 @@ export default function App() {
           </Routes>
         </main>
       </div>
+    
+  );
+}
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

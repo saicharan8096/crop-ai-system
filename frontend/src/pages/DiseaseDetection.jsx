@@ -33,6 +33,7 @@ export default function DiseaseDetection() {
 });
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState(null);
+ 
 
   // ── Handle file selection ──────────────────────────────────────────────────
   const handleFileSelect = useCallback((e) => {
@@ -50,7 +51,7 @@ export default function DiseaseDetection() {
     e.preventDefault();
     handleFileSelect(e);
   };
-
+ 
   // ── Submit to API ──────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!selectedFile) return;
@@ -60,6 +61,7 @@ export default function DiseaseDetection() {
     try {
       const data = await detectDisease(selectedFile);
       setResult(data);
+    
       const newEntry = {
   time: new Date().toLocaleString(),
   crop: data.crop,
@@ -92,27 +94,12 @@ setHistory((prev) => {
        🌿 {t("title")}
       </h1>
       <div style={{ marginBottom: 20 }}>
-  <button onClick={() => i18n.changeLanguage("en")}>
-    English
-  </button>
-
-  <button
-    onClick={() => i18n.changeLanguage("hi")}
-    style={{ marginLeft: 10 }}
-  >
-    हिंदी
-  </button>
-
-  <button
-    onClick={() => i18n.changeLanguage("te")}
-    style={{ marginLeft: 10 }}
-  >
-    తెలుగు
-  </button>
+       
 </div>
-      <p style={{ color: "#6b7280", marginBottom: 32 }}>
-       {t("upload")}The AI will identify the disease, estimate severity,
-        and show you exactly which part of the leaf triggered the diagnosis.
+      
+       <p style={{ color: "#6b7280", marginBottom: 32 }}>
+  {t("uploadDescription")}
+
       </p>
 
       {/* ── Upload area ─────────────────────────────────────────────────── */}
@@ -148,10 +135,10 @@ setHistory((prev) => {
           <>
             <div style={{ fontSize: 48, marginBottom: 8 }}>📷</div>
             <p style={{ color: "#6b7280", margin: 0 }}>
-              Drag and drop a leaf image here, or click to browse
+            {t("dragDrop")}
             </p>
             <p style={{ color: "#9ca3af", fontSize: 14, marginTop: 4 }}>
-              Supports JPEG and PNG
+            {t("supports")}
             </p>
           </>
         )}
@@ -174,7 +161,9 @@ setHistory((prev) => {
           marginBottom: 24,
         }}
       >
-        {loading ? "🔍 Analysing leaf..." : `{t("analyse")} →`}
+        <>
+  {loading ? `🔍 ${t("analysing")}`: `${t("analyse")} →`}
+</>
       </button>
 
       {/* ── Error ───────────────────────────────────────────────────────── */}
@@ -198,7 +187,9 @@ setHistory((prev) => {
 
           {/* Left: diagnosis details */}
           <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
-            <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Diagnosis</h2>
+            <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>
+  {t("diagnosis")}
+</h2>
             <button
   onClick={() => {
     const report = `
@@ -243,7 +234,7 @@ Generated: ${new Date().toLocaleString()}
     marginBottom: 16,
   }}
 >
-  Download Report
+  {t("downloadReport")}
 </button>
 
             {/* Severity badge */}
@@ -261,12 +252,12 @@ Generated: ${new Date().toLocaleString()}
               {result.severity}
             </span>
 
-            <p><strong>Crop:</strong> {result.crop}</p>
-            <p><strong>Disease:</strong> {result.disease_name}</p>
-            <p><strong>Confidence:</strong> {(result.confidence * 100).toFixed(1)}%</p>
-            <p><strong>Pesticide:</strong> {result.pesticide}</p>
-            <p><strong>Dosage:</strong> {result.dosage}</p>
-            <p><strong>Advice:</strong> {result.advice}</p>
+            <p><strong>{t("crop")}:</strong> {result.crop}</p>
+            <p><strong>{t("disease")}:</strong> {result.disease_name}</p>
+            <p><strong>{t("confidence")}:</strong> {(result.confidence * 100).toFixed(1)}%</p>
+            <p><strong>{t("pesticide")}:</strong> {result.pesticide}</p>
+            <p><strong>{t("dosage")}:</strong> {result.dosage}</p>
+            <p><strong>{t("advice")}:</strong> {result.advice}</p>
 
             {/* Confidence bar */}
             <div style={{ background: "#e5e7eb", borderRadius: 4, height: 8, margin: "8px 0 20px" }}>
@@ -278,8 +269,8 @@ Generated: ${new Date().toLocaleString()}
               }} />
             </div>
 
-            {/* Top 3 predictions */}
-            <h3 style={{ fontSize: "1rem", marginBottom: 8 }}>Top 3 predictions</h3>
+            {/* {t("topPredictions")} */}
+            <h3 style={{ fontSize: "1rem", marginBottom: 8 }}>{t("topPredictions")}</h3>
             {result.top3_predictions.map((p, i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between",
                                     padding: "6px 0", borderBottom: "1px solid #f3f4f6",
@@ -292,7 +283,7 @@ Generated: ${new Date().toLocaleString()}
 
           {/* Right: Grad-CAM heatmap */}
           <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
-            <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Grad-CAM Heatmap</h2>
+            <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>{t("heatmap")}</h2>
             <p style={{ fontSize: 13, color: "#6b7280" }}>
               Red/yellow areas = the parts of the leaf the AI focused on to make its decision.
               This is called Explainable AI (XAI).
@@ -327,7 +318,7 @@ Generated: ${new Date().toLocaleString()}
     alignItems: "center",
   }}
 >
-  <h2 style={{ marginTop: 0 }}>Prediction History</h2>
+  <h2 style={{ marginTop: 0 }}>{t("predictionHistory")}</h2>
 
   <button
     onClick={() => {
@@ -343,7 +334,7 @@ Generated: ${new Date().toLocaleString()}
       cursor: "pointer",
     }}
   >
-    Clear History
+    {t("clearHistory")}
   </button>
 </div>
 
@@ -355,11 +346,11 @@ Generated: ${new Date().toLocaleString()}
                 borderBottom: "1px solid #f3f4f6",
               }}
             >
-              <p><strong>Time:</strong> {item.time}</p>
-              <p><strong>Crop:</strong> {item.crop}</p>
-              <p><strong>Disease:</strong> {item.disease}</p>
+              <p><strong>{t("time")}:</strong> {item.time}</p>
+              <p><strong>{t("crop")}:</strong> {item.crop}</p>
+              <p><strong>{t("disease")}:</strong> {item.disease}</p>
               <p>
-                <strong>Confidence:</strong>{" "}
+                <strong>{t("confidence")}:</strong>{" "}
                 {(item.confidence * 100).toFixed(1)}%
               </p>
             </div>
