@@ -1,0 +1,60 @@
+.glass-card{
+
+  background:
+  rgba(255,255,255,0.08);
+
+  backdrop-filter:
+  blur(20px);
+
+  border:
+  1px solid rgba(255,255,255,0.1);
+
+  border-radius:24px;
+
+  box-shadow:
+  0 8px 32px rgba(0,0,0,0.3);
+
+  transition:
+  all 0.3s ease;
+}
+
+.glass-card:hover{
+
+  transform:
+  translateY(-8px);
+
+  box-shadow:
+  0 12px 40px rgba(34,197,94,0.25);
+}
+
+.gradient-button{
+
+  background:
+  linear-gradient(
+    135deg,
+    #22c55e,
+    #15803d
+  );
+
+  border:none;
+
+  color:white;
+
+  font-weight:600;
+
+  border-radius:16px;
+
+  cursor:pointer;
+
+  transition:
+  all 0.3s ease;
+}
+
+.gradient-button:hover{
+
+  transform:
+  scale(1.05);
+
+  box-shadow:
+  0 8px 30px rgba(34,197,94,0.4);
+}

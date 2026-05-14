@@ -1,173 +1,962 @@
-/**
- * pages/Recommendations.jsx
- * ==========================
- * Page where the farmer gets actionable treatment and care advice.
- */
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  getDocs
+} from "firebase/firestore";
 
-import React, { useState } from "react";
+import {
+  db,
+  auth
+} from "../firebase";
+
+import React, {
+  useState,
+  useEffect
+} from "react";
+
 import { getRecommendations } from "../services/api";
+
 import { useTranslation } from "react-i18next";
 
+import VoiceAssistant from "../components/VoiceAssistant";
+
+import jsPDF from "jspdf";
+
+import html2canvas from "html2canvas";
+
 const inputStyle = {
-  width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #d1d5db",
-  borderRadius: 6, fontSize: 14, boxSizing: "border-box",
+
+  width: "100%",
+
+  padding: "0.75rem 0.9rem",
+
+  border: "1px solid #d1d5db",
+
+  borderRadius: 10,
+
+  fontSize: 14,
+
+  boxSizing: "border-box",
+
+  background:"white",
+
+  color:"#111827",
+
+  outline:"none",
 };
 
 const URGENCY_COLORS = {
-  "Monitor":           { bg: "#d1fae5", text: "#065f46" },
-  "Act within 7 days": { bg: "#fef3c7", text: "#92400e" },
-  "Act immediately":   { bg: "#fee2e2", text: "#991b1b" },
+
+  "Monitor": {
+    bg: "#d1fae5",
+    text: "#065f46"
+  },
+
+  "Act within 7 days": {
+    bg: "#fef3c7",
+    text: "#92400e"
+  },
+
+  "Act immediately": {
+    bg: "#fee2e2",
+    text: "#991b1b"
+  },
 };
 
-function ListCard({ title, emoji, items, color = "#2563eb" }) {
+function ListCard({
+  title,
+  emoji,
+  items,
+  color = "#2563eb"
+}) {
+
   return (
-    <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.25rem", marginBottom: 16 }}>
-      <h3 style={{ marginTop: 0, color: color, fontSize: "1rem" }}>{emoji} {title}</h3>
-      <ul style={{ paddingLeft: 20, margin: 0 }}>
-        {items.map((item, i) => (
-          <li key={i} style={{ marginBottom: 6, fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
+
+    <div
+    style={{
+
+      border: "1px solid #e5e7eb",
+
+      borderRadius: 18,
+
+      padding: "1.4rem",
+
+      marginBottom: 18,
+
+      background:"rgba(255,255,255,0.75)",
+
+      backdropFilter:"blur(12px)",
+
+      boxShadow:
+      "0 6px 24px rgba(0,0,0,0.05)",
+    }}
+    >
+
+      <h3
+      style={{
+
+        marginTop: 0,
+
+        color: color,
+
+        fontSize: "1.05rem",
+
+        marginBottom:"14px",
+      }}
+      >
+        {emoji} {title}
+      </h3>
+
+      <ul
+      style={{
+        paddingLeft: 20,
+        margin: 0,
+      }}
+      >
+
+        {items?.map((item, i) => (
+
+          <li
+          key={i}
+          style={{
+
+            marginBottom: 8,
+
+            fontSize: 14,
+
+            color: "#374151",
+
+            lineHeight: 1.7,
+          }}
+          >
             {item}
           </li>
+
         ))}
+
       </ul>
+
     </div>
   );
 }
 
 export default function Recommendations() {
-  const { t } = useTranslation();
-  const [form, setForm] = useState({
-    crop: "Tomato", disease_name: "Early blight", severity: "Mild",
-    temperature_c: 28, humidity_pct: 65, rainfall_last_7_days_mm: 20,
+
+  const { t, i18n } =
+  useTranslation();
+
+  const [form, setForm] =
+  useState({
+
+    crop: "Tomato",
+
+    disease_name: "Early blight",
+
+    severity: "Mild",
+
+    temperature_c: 28,
+
+    humidity_pct: 65,
+
+    rainfall_last_7_days_mm: 20,
+
     crop_stage: "Vegetative",
   });
-  const [result, setResult]   = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
 
-  const update = (field) => (e) =>
-    setForm((p) => ({ ...p, [field]: parseFloat(e.target.value) || e.target.value }));
+  const [result, setResult] =
+  useState(null);
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
+  const [loading, setLoading] =
+  useState(false);
+
+  const [error, setError] =
+  useState(null);
+
+  const [history, setHistory] =
+  useState([]);
+
+  const loadHistory =
+  async () => {
+
     try {
-      setResult(await getRecommendations(form));
+
+      const q = query(
+
+        collection(
+          db,
+          "recommendations"
+        ),
+
+        orderBy(
+          "createdAt",
+          "desc"
+        ),
+
+        limit(5)
+      );
+
+      const snapshot =
+      await getDocs(q);
+
+      const historyData =
+      snapshot.docs.map((doc)=>({
+
+        id:doc.id,
+
+        ...doc.data(),
+      }));
+
+      setHistory(historyData);
+
     } catch (err) {
-      setError(err.response?.data?.detail || "Error connecting to server.");
+
+      console.log(err);
+    }
+  };
+
+  useEffect(()=>{
+
+    loadHistory();
+
+  },[]);
+
+  const downloadPDF =
+  async () => {
+
+    const input =
+    document.getElementById(
+      "recommendation-report"
+    );
+
+    if(!input) return;
+
+    const canvas =
+    await html2canvas(input);
+
+    const imgData =
+    canvas.toDataURL("image/png");
+
+    const pdf =
+    new jsPDF(
+      "p",
+      "mm",
+      "a4"
+    );
+
+    const pdfWidth =
+    pdf.internal.pageSize.getWidth();
+
+    const pdfHeight =
+    (canvas.height * pdfWidth) /
+    canvas.width;
+
+    pdf.addImage(
+
+      imgData,
+
+      "PNG",
+
+      0,
+
+      0,
+
+      pdfWidth,
+
+      pdfHeight
+    );
+
+    pdf.save(
+      "CropAI_Recommendations_Report.pdf"
+    );
+  };
+
+  const handleVoiceCommand = (
+  command,
+  speak
+) => {
+
+  console.log(
+    "VOICE:",
+    command
+  );
+
+  const text =
+  command.toLowerCase();
+
+  /* =========================================
+     CROPS
+  ========================================= */
+
+  if(text.includes("tomato")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop:"Tomato"
+    }));
+
+    speak(
+      "Crop changed to Tomato"
+    );
+  }
+
+  else if(text.includes("potato")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop:"Potato"
+    }));
+
+    speak(
+      "Crop changed to Potato"
+    );
+  }
+
+  else if(text.includes("rice")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop:"Rice"
+    }));
+
+    speak(
+      "Crop changed to Rice"
+    );
+  }
+
+  else if(text.includes("wheat")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop:"Wheat"
+    }));
+
+    speak(
+      "Crop changed to Wheat"
+    );
+  }
+
+  /* =========================================
+     DISEASES
+  ========================================= */
+
+  if(text.includes("blight")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      disease_name:"Early blight"
+    }));
+
+    speak(
+      "Disease changed to Early blight"
+    );
+  }
+
+  else if(text.includes("rust")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      disease_name:"Leaf Rust"
+    }));
+
+    speak(
+      "Disease changed to Leaf Rust"
+    );
+  }
+
+  else if(text.includes("healthy")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      disease_name:"Healthy"
+    }));
+
+    speak(
+      "Disease changed to Healthy"
+    );
+  }
+
+  /* =========================================
+     SEVERITY
+  ========================================= */
+
+  if(text.includes("mild")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      severity:"Mild"
+    }));
+
+    speak(
+      "Severity set to Mild"
+    );
+  }
+
+  else if(text.includes("moderate")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      severity:"Moderate"
+    }));
+
+    speak(
+      "Severity set to Moderate"
+    );
+  }
+
+  else if(text.includes("severe")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      severity:"Severe"
+    }));
+
+    speak(
+      "Severity set to Severe"
+    );
+  }
+
+  /* =========================================
+     TEMPERATURE
+  ========================================= */
+
+  const tempMatch =
+  text.match(
+    /temperature\s(\d+)/i
+  );
+
+  if(tempMatch){
+
+    const value =
+    parseInt(tempMatch[1]);
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      temperature_c:value
+    }));
+
+    speak(
+      `Temperature set to ${value}`
+    );
+  }
+
+  /* =========================================
+     HUMIDITY
+  ========================================= */
+
+  const humidityMatch =
+  text.match(
+    /humidity\s(\d+)/i
+  );
+
+  if(humidityMatch){
+
+    const value =
+    parseInt(
+      humidityMatch[1]
+    );
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      humidity_pct:value
+    }));
+
+    speak(
+      `Humidity set to ${value}`
+    );
+  }
+
+  /* =========================================
+     RAINFALL
+  ========================================= */
+
+  const rainfallMatch =
+  text.match(
+    /rainfall\s(\d+)/i
+  );
+
+  if(rainfallMatch){
+
+    const value =
+    parseInt(
+      rainfallMatch[1]
+    );
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      rainfall_last_7_days_mm:value
+    }));
+
+    speak(
+      `Rainfall set to ${value}`
+    );
+  }
+
+  /* =========================================
+     CROP STAGE
+  ========================================= */
+
+  if(text.includes("vegetative")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop_stage:"Vegetative"
+    }));
+
+    speak(
+      "Crop stage changed to Vegetative"
+    );
+  }
+
+  else if(text.includes("flowering")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop_stage:"Flowering"
+    }));
+
+    speak(
+      "Crop stage changed to Flowering"
+    );
+  }
+
+  else if(text.includes("harvesting")){
+
+    setForm((prev)=>({
+
+      ...prev,
+
+      crop_stage:"Harvesting"
+    }));
+
+    speak(
+      "Crop stage changed to Harvesting"
+    );
+  }
+};
+
+  const update =
+  (field) => (e) =>
+
+    setForm((p) => ({
+
+      ...p,
+
+      [field]:
+
+      parseFloat(
+        e.target.value
+      )
+
+      || e.target.value
+    }));
+
+  const handleSubmit =
+  async () => {
+
+    setLoading(true);
+
+    setError(null);
+
+    try {
+
+      const response =
+      await getRecommendations(form);
+
+      setResult(response);
+
+      await addDoc(
+
+        collection(
+          db,
+          "recommendations"
+        ),
+
+        {
+
+          userId:
+          auth.currentUser?.uid || "",
+
+          crop:
+          form.crop,
+
+          disease:
+          form.disease_name,
+
+          cropStage:
+          form.crop_stage,
+
+          severity:
+          form.severity,
+
+          recommendation:
+          JSON.stringify(response),
+
+          createdAt:
+          serverTimestamp(),
+        }
+      );
+
+      loadHistory();
+
+    } catch (err) {
+
+      console.log(err);
+
+      setError(
+
+        err.response?.data?.detail ||
+
+        "Error connecting to server."
+      );
+
     } finally {
+
       setLoading(false);
     }
   };
 
-  const urgency = result ? URGENCY_COLORS[result.urgency] : null;
+  const urgency =
+  result
+
+  ? URGENCY_COLORS[
+      result.urgency
+    ]
+
+  : null;
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1 style={{ fontSize: "1.8rem", fontWeight: 600, marginBottom: 8 }}>💡 {t("recommendationsTitle")}</h1>
-      <p style={{ color: "#6b7280", marginBottom: 32 }}>
-        Enter your crop situation and weather conditions to get specific treatment,
-        fertilizer, and irrigation recommendations.
+
+    <div
+    style={{
+
+      maxWidth: 1100,
+
+      margin: "0 auto",
+
+      padding: "2rem 1rem",
+    }}
+    >
+
+      <h1
+      style={{
+
+        fontSize: "2.4rem",
+
+        fontWeight: 800,
+
+        marginBottom: 8,
+
+        color:"#111827",
+      }}
+      >
+        💡 {t("recommendationsTitle")}
+      </h1>
+
+      <p
+      style={{
+
+        color: "#6b7280",
+
+        marginBottom: 32,
+
+        fontSize:"16px",
+
+        lineHeight:1.7,
+      }}
+      >
+        {t("recommendationsTitle")}
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 32 }}>
-        {/* Form */}
-        <div>
-          <h2 style={{ fontSize: "1.1rem", marginBottom: 16 }}>{t("cropSituation")}</h2>
+      <div
+      style={{
 
-          {[
-            { label: t("crop"), field: "crop", type: "text" },
-            { label: t("diseaseDetected"), field: "disease_name", type: "text" },
-          ].map(({ label, field }) => (
-            <div key={field} style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{label}</label>
-              <input type="text" style={inputStyle} value={form[field]} onChange={update(field)} />
-            </div>
-          ))}
+        display: "grid",
 
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{t("severity")}</label>
-            <select style={inputStyle} value={form.severity} onChange={update("severity")}>
-              {["Healthy", "Mild", "Moderate", "Severe"].map((s) => <option key={s}>{s}</option>)}
-            </select>
+        gridTemplateColumns:
+        window.innerWidth < 768
+        ? "1fr"
+        : "1fr 1.4fr",
+
+        gap: 32,
+      }}
+      >
+
+        <div
+        style={{
+
+          background:"rgba(255,255,255,0.75)",
+
+          backdropFilter:"blur(16px)",
+
+          borderRadius:"24px",
+
+          padding:"28px",
+
+          boxShadow:
+          "0 8px 30px rgba(0,0,0,0.06)",
+        }}
+        >
+
+          <h2
+          style={{
+            color:"#111827",
+          }}
+          >
+            {t("cropSituation")}
+          </h2>
+
+          <VoiceAssistant
+          i18n={i18n}
+          onCommand={handleVoiceCommand}
+          />
+
+          <div style={{marginBottom:16}}>
+
+            <label
+            style={{
+              color:"#111827",
+              fontWeight:"600",
+            }}
+            >
+              {t("crop")}
+            </label>
+
+            <input
+            type="text"
+            style={inputStyle}
+            value={form.crop}
+            onChange={update("crop")}
+            />
+
           </div>
 
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{t("cropStage")}</label>
-            <select style={inputStyle} value={form.crop_stage} onChange={update("crop_stage")}>
-              {["Seedling", "Vegetative", "Flowering", "Fruiting", "Harvest"].map((s) => <option key={s}>{s}</option>)}
-            </select>
-          </div>
+          <div style={{marginBottom:16}}>
 
-          <h2 style={{ fontSize: "1rem", marginTop: 20, marginBottom: 12 }}>{t("currentWeather")}</h2>
-          {[
-            { label: t("temperature"), field: "temperature_c" },
-            { label: t("humidity"), field: "humidity_pct" },
-            { label: t("rainfall"), field: "rainfall_last_7_days_mm" },
-          ].map(({ label, field }) => (
-            <div key={field} style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{label}</label>
-              <input type="number" style={inputStyle} value={form[field]} onChange={update(field)} />
-            </div>
-          ))}
+            <label
+            style={{
+              color:"#111827",
+              fontWeight:"600",
+            }}
+            >
+              {t("disease")}
+            </label>
+
+            <input
+            type="text"
+            style={inputStyle}
+            value={form.disease_name}
+            onChange={update("disease_name")}
+            />
+
+          </div>
 
           <button
-            onClick={handleSubmit}
-            disabled={loading}
-            style={{
-              width: "100%", padding: "0.9rem",
-              background: loading ? "#d1d5db" : "#d97706",
-              color: "white", border: "none", borderRadius: 8,
-              fontSize: "1rem", fontWeight: 600,
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
+
+          onClick={handleSubmit}
+
+          disabled={loading}
+
+          style={{
+
+            width:"100%",
+
+            padding:"1rem",
+
+            background:
+            loading
+            ? "#d1d5db"
+            : "#d97706",
+
+            color:"white",
+
+            border:"none",
+
+            borderRadius:"14px",
+
+            fontWeight:"700",
+
+            cursor:"pointer",
+          }}
           >
-            {loading ? "Generating..." : `${t("getRecommendations")} →`}
+            {loading
+            ? t("loading")
+            : t("getRecommendations")}
           </button>
+
         </div>
 
-        {/* Results */}
         <div>
-          {error && (
-            <div style={{ background: "#fee2e2", border: "1px solid #f87171",
-                          borderRadius: 8, padding: "1rem", color: "#991b1b", marginBottom: 16 }}>
-              ⚠️ {error}
-            </div>
-          )}
 
           {result && (
-            <>
-              {/* Urgency banner */}
-              <div style={{
-                background: urgency?.bg, color: urgency?.text,
-                borderRadius: 10, padding: "1rem 1.25rem", marginBottom: 20,
-                fontWeight: 600, fontSize: 15,
-              }}>
-                🚨 {result.urgency}: {result.alert_message}
+
+            <div
+            id="recommendation-report"
+            >
+
+              <div
+              style={{
+
+                background:
+                urgency?.bg,
+
+                color:
+                urgency?.text,
+
+                borderRadius:14,
+
+                padding:"1rem",
+
+                marginBottom:22,
+
+                fontWeight:"700",
+              }}
+              >
+                🚨 {result.urgency}
               </div>
 
-              <ListCard title="Disease Treatment" emoji="💊" items={result.treatment} color="#dc2626" />
-              <ListCard title="Fertilizer Plan"   emoji="🌱" items={result.fertilizer} color="#16a34a" />
-              <ListCard title="Preventive Actions" emoji="🛡️" items={result.preventive_actions} color="#7c3aed" />
+              <ListCard
+              title={t("diseaseDetected")}
+              emoji="💊"
+              items={result.treatment}
+              color="#dc2626"
+              />
 
-              {/* Irrigation */}
-              <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.25rem" }}>
-                <h3 style={{ marginTop: 0, color: "#2563eb", fontSize: "1rem" }}>💧 Irrigation Advice</h3>
-                <p style={{ fontSize: 14, color: "#374151", margin: 0, lineHeight: 1.7 }}>
-                  {result.irrigation}
-                </p>
-              </div>
-            </>
-          )}
+              <ListCard
+              title={t("advice")}
+              emoji="🌱"
+              items={result.fertilizer}
+              color="#16a34a"
+              />
 
-          {!result && !error && (
-            <div style={{ background: "#f9fafb", border: "1px dashed #d1d5db",
-                          borderRadius: 12, padding: "3rem", textAlign: "center", color: "#9ca3af" }}>
-              Fill in the crop situation and click "Get Recommendations".
+              <button
+
+              onClick={downloadPDF}
+
+              style={{
+
+                width:"100%",
+
+                padding:"1rem",
+
+                background:
+                "linear-gradient(135deg,#16a34a,#15803d)",
+
+                color:"white",
+
+                border:"none",
+
+                borderRadius:"14px",
+
+                fontWeight:"700",
+
+                cursor:"pointer",
+              }}
+              >
+                {t("downloadReport")}
+              </button>
+
             </div>
+
           )}
+
         </div>
+
       </div>
+
+      <div
+      style={{
+        marginTop:"40px",
+      }}
+      >
+
+        <h2
+        style={{
+          color:"#111827",
+          marginBottom:"18px",
+        }}
+        >
+          {t("recommendationsTitle")}
+        </h2>
+
+        <div
+        style={{
+
+          display:"grid",
+
+          gap:"16px",
+        }}
+        >
+
+          {history.map((item,index)=>(
+
+            <div
+
+            key={index}
+
+            style={{
+
+              background:"#ffffff",
+
+              borderRadius:"18px",
+
+              padding:"18px",
+
+              boxShadow:
+              "0 8px 20px rgba(0,0,0,0.05)",
+            }}
+            >
+
+              <h3
+              style={{
+                margin:"0",
+                color:"#111827",
+              }}
+              >
+                {item.crop}
+              </h3>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

@@ -10,12 +10,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Import our route modules (each handles one feature)
 from routes import disease, yield_pred, recommendations, weather
+from fastapi.middleware.cors import CORSMiddleware
 
 # ── Create the FastAPI app ───────────────────────────────────────────────────
 app = FastAPI(
     title="Crop Health AI System",
     description="AI-powered disease detection, yield prediction, and crop recommendations",
     version="1.0.0",
+    
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── Allow React frontend (port 3000) to talk to this backend (port 8001) ────

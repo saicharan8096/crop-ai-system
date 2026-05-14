@@ -1,155 +1,752 @@
-/**
- * pages/Dashboard.jsx
- * ====================
- * Home page showing:
- * - Live weather widget (fetches from backend → OpenWeather API)
- * - Quick summary cards for each module
- * - Getting started guide
- */
+import React, {
+  useEffect,
+  useState
+} from "react";
 
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getWeather } from "../services/api";
+import axios from "axios";
 
-function StatCard({ emoji, title, description, path, color }) {
-  const navigate = useNavigate();
-  return (
-    <div
-      onClick={() => navigate(path)}
-      style={{
-        background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12,
-        padding: "1.5rem", cursor: "pointer",
-        borderTop: `4px solid ${color}`,
-        transition: "box-shadow 0.15s",
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"}
-      onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
-    >
-      <div style={{ fontSize: 36, marginBottom: 8 }}>{emoji}</div>
-      <h3 style={{ margin: "0 0 6px", fontSize: "1.05rem", fontWeight: 600 }}>{title}</h3>
-      <p style={{ margin: 0, color: "#6b7280", fontSize: 14, lineHeight: 1.5 }}>{description}</p>
-      <span style={{ display: "inline-block", marginTop: 12, fontSize: 13,
-                     color: color, fontWeight: 500 }}>
-        Open →
-      </span>
-    </div>
-  );
+import {
+  useNavigate
+} from "react-router-dom";
+
+import {
+  useTranslation
+} from "react-i18next";
+import {
+  doc,
+  getDoc
+} from "firebase/firestore";
+
+import {
+  db,
+  auth
+} from "../firebase";
+
+const floatingAnimation = `
+@keyframes floatCard {
+
+0% {
+transform: translateY(0px);
 }
 
-export default function Dashboard() {
-  const [weather, setWeather]   = useState(null);
-  const [city, setCity]         = useState("Delhi");
-  const [cityInput, setCityInput] = useState("Delhi");
+50% {
+transform: translateY(-4px);
+}
 
-  const fetchWeather = async (c) => {
-    try {
-      const data = await getWeather(c);
-      setWeather(data);
-    } catch {
-      setWeather(null);
+100% {
+transform: translateY(0px);
+}
+}
+`;
+
+export default function Dashboard() {
+
+  const navigate = useNavigate();
+
+  const {
+    t,
+    i18n
+  } = useTranslation();
+
+  const [weather,setWeather] =
+  useState(null);
+
+  const [loading,setLoading] =
+  useState(true);
+  const [farmer,setFarmer] =
+useState(null);
+
+  useEffect(()=>{
+
+  const loadFarmer =
+  async ()=>{
+
+    try{
+
+      const uid =
+      auth.currentUser?.uid;
+
+      if(!uid) return;
+
+      const snap =
+      await getDoc(
+
+        doc(
+          db,
+          "farmers",
+          uid
+        )
+      );
+
+      if(snap.exists()){
+
+        setFarmer(
+          snap.data()
+        );
+      }
+
+    }catch(error){
+
+      console.log(error);
     }
   };
 
-  useEffect(() => { fetchWeather(city); }, [city]);
+  const fetchWeather =
+  async ()=>{
+
+    try{
+
+      const city =
+      farmer?.district || "Delhi";
+
+      const response =
+      await axios.get(
+
+`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=136a197a82b357036573fb982d2ffbbc`
+      );
+
+      setWeather(
+        response.data
+      );
+
+    }catch(error){
+
+      console.log(error);
+
+    }finally{
+
+      setLoading(false);
+    }
+  };
+
+  loadFarmer();
+
+  fetchWeather();
+
+},[farmer]);
+  const isMobile =
+  window.innerWidth < 768;
+
+  const cardStyle = {
+
+    background:"rgba(255,255,255,0.96)",
+
+    borderRadius:"22px",
+
+    padding:"22px",
+
+    minHeight:"155px",
+
+    transition:
+    "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+
+    cursor:"pointer",
+
+    position:"relative",
+
+    overflow:"hidden",
+
+    border:"1px solid rgba(255,255,255,0.7)",
+  };
+
+  const hoverEnter = (e)=>{
+
+    e.currentTarget.style.transform =
+    "translateY(-6px)";
+  };
+
+  const hoverLeave = (e)=>{
+
+    e.currentTarget.style.transform =
+    "translateY(0px)";
+  };
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "2rem 1.5rem" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
-          Welcome to CropAI 🌾
-        </h1>
-        <p style={{ color: "#6b7280", marginTop: 8, fontSize: 16 }}>
-          An AI-powered decision support system for smart farming.
-        </p>
-      </div>
 
-      {/* Live weather */}
-      <div style={{ background: "linear-gradient(135deg, #1d4ed8 0%, #16a34a 100%)",
-                    borderRadius: 12, padding: "1.5rem", color: "white", marginBottom: 32 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+    <>
+
+      <style>
+        {floatingAnimation}
+      </style>
+
+      <div
+      style={{
+
+        padding:
+        isMobile
+        ? "16px"
+        : "24px 30px 42px 30px",
+
+        maxWidth:"1380px",
+
+        margin:"0 auto",
+
+        background:
+        "linear-gradient(135deg,#f8fafc,#eef2ff)",
+
+        minHeight:"100vh",
+      }}
+      >
+
+        {/* HEADER */}
+
+        <div
+        style={{
+
+          marginBottom:"24px",
+
+          display:"flex",
+
+          justifyContent:"space-between",
+
+          alignItems:
+          isMobile
+          ? "flex-start"
+          : "center",
+
+          flexDirection:
+          isMobile
+          ? "column"
+          : "row",
+
+          gap:"16px",
+        }}
+        >
+
           <div>
-            <p style={{ margin: "0 0 4px", opacity: 0.8, fontSize: 13 }}>Live Weather</p>
-            {weather ? (
-              <>
-                <div style={{ fontSize: "2.5rem", fontWeight: 700 }}>{weather.temperature_c}°C</div>
-                <div style={{ opacity: 0.9 }}>{weather.description} — {weather.city}</div>
-                <div style={{ marginTop: 8, fontSize: 14, opacity: 0.8 }}>
-                  💧 Humidity: {weather.humidity_pct}% &nbsp; 💨 Wind: {weather.wind_speed_ms} m/s
-                  &nbsp; 🌧 Rain: {weather.rainfall_1h_mm} mm/hr
-                </div>
-              </>
-            ) : (
-              <div style={{ opacity: 0.7 }}>Loading weather data...</div>
-            )}
-          </div>
-          {/* City search */}
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && setCity(cityInput)}
-              placeholder="Enter city..."
-              style={{
-                padding: "0.5rem 0.75rem", borderRadius: 8, border: "none",
-                fontSize: 14, width: 140,
-              }}
-            />
-            <button
-              onClick={() => setCity(cityInput)}
-              style={{
-                padding: "0.5rem 1rem", borderRadius: 8,
-                background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)",
-                color: "white", cursor: "pointer", fontSize: 14, fontWeight: 500,
-              }}
+
+            <h1
+            style={{
+
+              fontSize:
+              isMobile ? "34px" : "46px",
+
+              fontWeight:"800",
+
+              color:"#111827",
+
+              marginBottom:"6px",
+            }}
             >
-              Search
-            </button>
+              {t("dashboard")}
+            </h1>
+
+            <p
+            style={{
+
+              color:"#6b7280",
+
+              fontSize:"17px",
+            }}
+            >
+              Smart AI farming analytics platform.
+            </p>
+
           </div>
+
+          <select
+
+          value={i18n.language}
+
+          onChange={(e)=>
+          i18n.changeLanguage(
+            e.target.value
+          )}
+
+          style={{
+
+            padding:"12px",
+
+            borderRadius:"12px",
+
+            border:
+            "1px solid #d1d5db",
+
+            background:"white",
+
+            cursor:"pointer",
+
+            fontWeight:"600",
+          }}
+          >
+
+            <option value="en">
+              English
+            </option>
+
+            <option value="hi">
+              हिंदी
+            </option>
+
+            <option value="te">
+              తెలుగు
+            </option>
+
+          </select>
+
         </div>
-      </div>
 
-      {/* Module cards */}
-      <h2 style={{ fontSize: "1.2rem", fontWeight: 600, marginBottom: 16 }}>Modules</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 40 }}>
-        <StatCard
-          emoji="🌿" title="Disease Detection" color="#16a34a" path="/disease"
-          description="Upload a leaf photo. Get disease name, severity, and a Grad-CAM heatmap showing exactly what the AI saw."
-        />
-        <StatCard
-          emoji="📊" title="Yield Prediction" color="#2563eb" path="/yield"
-          description="Enter soil and weather data. Get predicted yield (kg/ha) with a risk score and SHAP feature importance chart."
-        />
-        <StatCard
-          emoji="💡" title="Recommendations" color="#d97706" path="/recommend"
-          description="Get AI-generated treatment, fertilizer, and irrigation advice based on disease + current weather."
-        />
-      </div>
+        {/* OVERVIEW */}
 
-      {/* Getting started steps */}
-      <h2 style={{ fontSize: "1.2rem", fontWeight: 600, marginBottom: 16 }}>How to use</h2>
-      <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, padding: "1.5rem" }}>
-        {[
-          { step: "1", text: "Start the backend: cd backend && uvicorn main:app --reload" },
-          { step: "2", text: "Train models: python notebooks/train_disease_model.py  (or skip to use demo mode)" },
-          { step: "3", text: "Go to Disease Detection → upload a leaf photo from the data/raw folder" },
-          { step: "4", text: "Go to Yield Prediction → enter your field details" },
-          { step: "5", text: "Go to Recommendations → get actionable treatment advice" },
-        ].map(({ step, text }) => (
-          <div key={step} style={{ display: "flex", gap: 16, marginBottom: 14, alignItems: "flex-start" }}>
-            <span style={{
-              minWidth: 28, height: 28, borderRadius: "50%",
-              background: "#16a34a", color: "white",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 700, fontSize: 13,
-            }}>{step}</span>
-            <code style={{ fontSize: 13, color: "#374151", lineHeight: 1.7, background: "#f9fafb",
-                           padding: "0.25rem 0.5rem", borderRadius: 4, flex: 1 }}>
-              {text}
-            </code>
+        <div
+        style={{
+
+          display:"grid",
+
+          gridTemplateColumns:
+          isMobile
+          ? "1fr"
+          : "repeat(3,1fr)",
+
+          gap:"20px",
+
+          marginBottom:"24px",
+        }}
+        >
+
+          {/* CARD 1 */}
+
+          <div
+
+          style={{
+            ...cardStyle,
+
+            borderTop:
+            "4px solid #3b82f6",
+
+            boxShadow:
+            "0 10px 28px rgba(59,130,246,0.18)",
+          }}
+
+          onClick={()=>
+          navigate("/disease-detection")
+          }
+
+          onMouseEnter={hoverEnter}
+
+          onMouseLeave={hoverLeave}
+          >
+
+            <div
+            style={{
+
+              width:"62px",
+
+              height:"62px",
+
+              borderRadius:"18px",
+
+              background:"#dbeafe",
+
+              display:"flex",
+
+              alignItems:"center",
+
+              justifyContent:"center",
+
+              fontSize:"28px",
+
+              marginBottom:"14px",
+            }}
+            >
+              🌿
+            </div>
+
+            <h3
+            style={{
+              color:"#111827",
+            }}
+            >
+              {t("diseaseDetection")}
+            </h3>
+
           </div>
-        ))}
+
+          {/* CARD 2 */}
+
+          <div
+
+          style={{
+            ...cardStyle,
+
+            borderTop:
+            "4px solid #22c55e",
+
+            boxShadow:
+            "0 10px 28px rgba(34,197,94,0.18)",
+          }}
+
+          onClick={()=>
+          navigate("/yield-prediction")
+          }
+
+          onMouseEnter={hoverEnter}
+
+          onMouseLeave={hoverLeave}
+          >
+
+            <div
+            style={{
+
+              width:"62px",
+
+              height:"62px",
+
+              borderRadius:"18px",
+
+              background:"#dcfce7",
+
+              display:"flex",
+
+              alignItems:"center",
+
+              justifyContent:"center",
+
+              fontSize:"28px",
+
+              marginBottom:"14px",
+            }}
+            >
+              📊
+            </div>
+
+            <h3
+            style={{
+              color:"#111827",
+            }}
+            >
+              {t("yieldPrediction")}
+            </h3>
+
+          </div>
+
+          {/* CARD 3 */}
+
+          <div
+
+          style={{
+            ...cardStyle,
+
+            borderTop:
+            "4px solid #9333ea",
+
+            boxShadow:
+            "0 10px 28px rgba(147,51,234,0.18)",
+          }}
+
+          onClick={()=>
+          navigate("/recommendations")
+          }
+
+          onMouseEnter={hoverEnter}
+
+          onMouseLeave={hoverLeave}
+          >
+
+            <div
+            style={{
+
+              width:"62px",
+
+              height:"62px",
+
+              borderRadius:"18px",
+
+              background:"#f3e8ff",
+
+              display:"flex",
+
+              alignItems:"center",
+
+              justifyContent:"center",
+
+              fontSize:"28px",
+
+              marginBottom:"14px",
+            }}
+            >
+              🌦
+            </div>
+
+            <h3
+            style={{
+              color:"#111827",
+            }}
+            >
+              {t("recommendations")}
+            </h3>
+
+          </div>
+
+        </div>
+
+        {/* WEATHER */}
+
+        <div
+
+        onMouseEnter={hoverEnter}
+
+        onMouseLeave={hoverLeave}
+
+        style={{
+
+          position:"relative",
+
+          overflow:"hidden",
+
+          borderRadius:"28px",
+
+          padding:
+          isMobile ? "22px" : "28px",
+
+          marginBottom:"26px",
+
+          backgroundImage:
+          "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1400')",
+
+          backgroundSize:"cover",
+
+          backgroundPosition:"center",
+
+          boxShadow:
+          "0 16px 38px rgba(37,99,235,0.18)",
+        }}
+        >
+
+          <div
+          style={{
+
+            position:"absolute",
+
+            inset:0,
+
+            background:
+            "linear-gradient(135deg,rgba(37,99,235,0.72),rgba(6,182,212,0.55))",
+          }}
+          />
+
+          <div
+          style={{
+
+            position:"relative",
+
+            zIndex:2,
+          }}
+          >
+
+            <h2
+            style={{
+              color:"white",
+              fontSize:"30px",
+            }}
+            >
+              Weather Today
+            </h2>
+
+            <h1
+            style={{
+
+              color:"white",
+
+              fontSize:
+              isMobile ? "54px" : "74px",
+
+              margin:"0",
+            }}
+            >
+              {loading || !weather
+              ? "--"
+              : `${Math.round(weather.main.temp)}°C`}
+            </h1>
+
+            <p
+            style={{
+
+              color:"white",
+
+              fontSize:"22px",
+            }}
+            >
+              {loading || !weather
+              ? "Loading..."
+              : weather.weather[0].main}
+            </p>
+
+            {/* WEATHER STATS */}
+
+            <div
+            style={{
+
+              display:"grid",
+
+              gridTemplateColumns:
+              isMobile
+              ? "1fr 1fr"
+              : "repeat(4,1fr)",
+
+              gap:"16px",
+
+              marginTop:"28px",
+            }}
+            >
+
+              {/* HUMIDITY */}
+
+              <div
+              style={{
+
+                background:
+                "rgba(255,255,255,0.18)",
+
+                backdropFilter:"blur(10px)",
+
+                borderRadius:"18px",
+
+                padding:"18px",
+
+                color:"white",
+              }}
+              >
+
+                <div
+                style={{
+                  fontSize:"28px",
+                  marginBottom:"8px",
+                }}
+                >
+                  💧
+                </div>
+
+                <p>Humidity</p>
+
+                <h3>
+                  {loading || !weather
+                  ? "--"
+                  : `${weather.main.humidity}%`}
+                </h3>
+
+              </div>
+
+              {/* WIND */}
+
+              <div
+              style={{
+
+                background:
+                "rgba(255,255,255,0.18)",
+
+                backdropFilter:"blur(10px)",
+
+                borderRadius:"18px",
+
+                padding:"18px",
+
+                color:"white",
+              }}
+              >
+
+                <div
+                style={{
+                  fontSize:"28px",
+                  marginBottom:"8px",
+                }}
+                >
+                  🌬️
+                </div>
+
+                <p>Wind</p>
+
+                <h3>
+                  {loading || !weather
+                  ? "--"
+                  : `${weather.wind.speed} m/s`}
+                </h3>
+
+              </div>
+
+              {/* FEELS LIKE */}
+
+              <div
+              style={{
+
+                background:
+                "rgba(255,255,255,0.18)",
+
+                backdropFilter:"blur(10px)",
+
+                borderRadius:"18px",
+
+                padding:"18px",
+
+                color:"white",
+              }}
+              >
+
+                <div
+                style={{
+                  fontSize:"28px",
+                  marginBottom:"8px",
+                }}
+                >
+                  🌡️
+                </div>
+
+                <p>Feels Like</p>
+
+                <h3>
+                  {loading || !weather
+                  ? "--"
+                  : `${Math.round(weather.main.feels_like)}°C`}
+                </h3>
+
+              </div>
+
+              {/* PRESSURE */}
+
+              <div
+              style={{
+
+                background:
+                "rgba(255,255,255,0.18)",
+
+                backdropFilter:"blur(10px)",
+
+                borderRadius:"18px",
+
+                padding:"18px",
+
+                color:"white",
+              }}
+              >
+
+                <div
+                style={{
+                  fontSize:"28px",
+                  marginBottom:"8px",
+                }}
+                >
+                  ☁️
+                </div>
+
+                <p>Pressure</p>
+
+                <h3>
+                  {loading || !weather
+                  ? "--"
+                  : `${weather.main.pressure} hPa`}
+                </h3>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
-    </div>
+
+    </>
+
   );
 }
